@@ -1,0 +1,8 @@
+volumes:
+  bundle:
+services:
+  app:
+    build: .
+    volumes:
+      - .:/rtetris
+      - bundle:/usr/local/bundle
