@@ -6,5 +6,6 @@ Just a basic tetris implementation.
 
 ```
 docker compose build
+docker compose run --rm app bundle install
 docker compose run --rm app rtetris
 ```
