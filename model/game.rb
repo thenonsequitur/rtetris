@@ -4,8 +4,11 @@ class Game
   FRAMES_PER_SECOND = 60
 
   MAX_SECONDS_PER_FALL = 1.0
-  MIN_SECONDS_PER_FALL = 0.10
-  SPEED_GRADATIONS = 50
+  MIN_SECONDS_PER_FALL = 0.05
+  SPEED_GRADATIONS = 100
+
+  BOARD_CHAR = '▒'
+  PIECE_CHAR = '▓'
 
   def initialize
     @lines = 0
@@ -22,14 +25,14 @@ class Game
     sleep(1.0 / FRAMES_PER_SECOND)
     @tick += 1
 
-    if (key = Key.getkey)
+    if (key = KeyPress.getkey)
       return false unless keypress(key)
     end
 
     frames_per_fall = @seconds_per_fall * FRAMES_PER_SECOND
     piece_down if @tick % frames_per_fall.ceil == 0
 
-    Screen.display(@board, @score, @lines, @piece)
+    draw_canvas
 
     return false if @board.collide?(@piece)
 
@@ -106,7 +109,7 @@ class Game
 
     if lines_completed > 0
       @lines += lines_completed
-      @score += 2 ** lines_completed
+      @score += 2 ** lines_completed - 1
       increase_speed(lines_completed)
     end
 
@@ -117,5 +120,72 @@ class Game
   def increase_speed(num_gradations)
     seconds_per_gradation = (MAX_SECONDS_PER_FALL - MIN_SECONDS_PER_FALL) / SPEED_GRADATIONS
     @seconds_per_fall -= num_gradations * seconds_per_gradation
+    @seconds_per_fall = MIN_SECONDS_PER_FALL if @seconds_per_fall < MIN_SECONDS_PER_FALL
+  end
+
+  def draw_canvas
+    game_elements_width = Board::COLS * 2 + 12
+    left = ((Canvas::COLS - game_elements_width) / 2).to_i
+
+    canvas = Canvas.new
+    canvas.draw_rectangle(0, left, board_rect)
+    canvas.draw_rectangle(0, left + board_rect.last.length + 2, stats_rect)
+    canvas.display
+  end
+
+  def board_rect
+    rect = []
+    0.upto(Board::ROWS - 1).each do |row|
+      rect_row = ''.dup
+      0.upto(Board::COLS - 1).each do |col|
+        cell = Coords.new(row, col)
+        char = ' '
+        if @piece.offset_coords.any? { |offset_coord| offset_coord == cell }
+          char = PIECE_CHAR
+        elsif @board.get(cell)
+          char = BOARD_CHAR
+        end
+        rect_row += char * 2
+      end
+      rect << rect_row
+    end
+
+    rect = Canvas.draw_border(rect)
+    rect.shift
+
+    rect
+  end
+
+  def stats_rect
+    rect = []
+
+    anchor_row = @next_piece.offsets.map { |offset| offset.row }.min * -1
+    anchor_col = @next_piece.offsets.map { |offset| offset.col }.min * -1
+
+    next_piece_grid = Array.new(4) { Array.new(4, false) }
+    @next_piece.offsets.each do |offset|
+      next_piece_grid[anchor_row + offset.row][anchor_col + offset.col] = true
+    end
+
+    rect << 'LINES'
+    rect << @lines.to_s
+    rect << ''
+
+    rect << 'SCORE'
+    rect << @score.to_s
+    rect << ''
+
+    rect << 'NEXT'
+    rect << ''
+    next_piece_grid.each do |row|
+      rect_row = ''.dup
+      row.each do |cell|
+        char = cell ? PIECE_CHAR : ' '
+        rect_row += char * 2
+      end
+      rect << rect_row
+    end
+
+    rect
   end
 end

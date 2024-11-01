@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Key
+module KeyPress
   def self.disable_echo
     system('stty -echo')
   end
