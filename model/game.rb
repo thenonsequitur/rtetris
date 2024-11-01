@@ -1,13 +1,16 @@
 # frozen_string_literal: true
 
 class Game
-  SPEED_MAX = 20.0
-  SPEED_INCREASE_PER_LINE = 0.25
+  FRAMES_PER_SECOND = 60
+
+  MAX_SECONDS_PER_FALL = 0.10
+  MIN_SECONDS_PER_FALL = 0.10
+  SPEED_GRADATIONS = 50
 
   def initialize
     @lines = 0
     @score = 0
-    @speed = 0.0
+    @seconds_per_fall = MAX_SECONDS_PER_FALL
 
     @board = Board.new
     @piece = spawn_piece
@@ -15,14 +18,15 @@ class Game
   end
 
   def tick
-    sleep(1 / SPEED_MAX)
+    sleep(1.0 / FRAMES_PER_SECOND)
     @tick += 1
 
     if (key = Key.getkey)
       return false unless keypress(key)
     end
 
-    piece_down if @tick % (SPEED_MAX - @speed).ceil == 0
+    frames_per_fall = @seconds_per_fall * FRAMES_PER_SECOND
+    piece_down if @tick % frames_per_fall.ceil == 0
 
     Screen.display(@board, @score, @lines, @piece)
 
@@ -102,10 +106,14 @@ class Game
     if lines_completed > 0
       @lines += lines_completed
       @score += 2 ** lines_completed
-      @speed += lines_completed * SPEED_INCREASE_PER_LINE
-      @speed = SPEED_MAX if @speed > SPEED_MAX
+      increase_speed(lines_completed)
     end
 
     @piece = spawn_piece
+  end
+
+  def increase_speed(num_gradations)
+    seconds_per_gradation = (MAX_SECONDS_PER_FALL - MIN_SECONDS_PER_FALL) / SPEED_GRADATIONS
+    @seconds_per_fall -= num_gradations * seconds_per_gradation
   end
 end
