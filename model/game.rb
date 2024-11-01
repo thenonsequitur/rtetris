@@ -26,8 +26,12 @@ class Game
     sleep(1.0 / FRAMES_PER_SECOND)
     @tick += 1
 
-    if (key = KeyPress.getkey)
-      return false unless keypress(key)
+    last_keypress = nil
+    while (key = KeyPress.getkey)
+      unless key == last_keypress
+        return false unless keypress(key)
+        last_keypress = key
+      end
     end
 
     frames_per_fall = @seconds_per_fall * FRAMES_PER_SECOND
