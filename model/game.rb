@@ -3,7 +3,7 @@
 class Game
   FRAMES_PER_SECOND = 60
 
-  MAX_SECONDS_PER_FALL = 0.10
+  MAX_SECONDS_PER_FALL = 1.0
   MIN_SECONDS_PER_FALL = 0.10
   SPEED_GRADATIONS = 50
 
@@ -14,6 +14,7 @@ class Game
 
     @board = Board.new
     @piece = spawn_piece
+    @next_piece = spawn_piece
     @tick = 0
   end
 
@@ -109,7 +110,8 @@ class Game
       increase_speed(lines_completed)
     end
 
-    @piece = spawn_piece
+    @piece = @next_piece
+    @next_piece = spawn_piece
   end
 
   def increase_speed(num_gradations)
