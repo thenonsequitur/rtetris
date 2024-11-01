@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Game
   SPEED_MAX = 20.0
   SPEED_INCREASE_PER_LINE = 0.25

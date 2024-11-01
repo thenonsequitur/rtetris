@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Coords
   attr_accessor :row
   attr_accessor :col

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Board
   ROWS = 20
   COLS = 10

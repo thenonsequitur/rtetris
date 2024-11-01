@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Key
   def self.disable_echo
     system('stty -echo')

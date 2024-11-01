@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Screen
   def self.clear
     print "\e[H\e[2J"
