@@ -1,40 +1,68 @@
 # frozen_string_literal: true
 
+      COLORS = %w[ red green brown blue magenta cyan bold ]
+
 class Piece
   PIECES = [
     # I
-    [Coords.new(0, 0), Coords.new(-2, 0), Coords.new(-1, 0), Coords.new(1, 0)],
+    {
+      offsets: [Coords.new(0, 0), Coords.new(-2, 0), Coords.new(-1, 0), Coords.new(1, 0)],
+      color: 'bold'
+    },
     # T
-    [Coords.new(0, 0), Coords.new(-1, 0), Coords.new(0, -1), Coords.new(0, 1)],
+    {
+      offsets: [Coords.new(0, 0), Coords.new(-1, 0), Coords.new(0, -1), Coords.new(0, 1)],
+      color: 'magenta'
+    },
     # Box
-    [Coords.new(0, 0), Coords.new(0, 1), Coords.new(1, 0), Coords.new(1, 1)],
+    {
+      offsets: [Coords.new(0, 0), Coords.new(0, 1), Coords.new(1, 0), Coords.new(1, 1)],
+      color: 'red'
+    },
     # right L
-    [Coords.new(0, 0), Coords.new(0, -1), Coords.new(0, 1), Coords.new(1, 1)],
+    {
+      offsets: [Coords.new(0, 0), Coords.new(0, -1), Coords.new(0, 1), Coords.new(1, 1)],
+      color: 'green'
+    },
     # left L
-    [Coords.new(0, 0), Coords.new(0, -1), Coords.new(0, 1), Coords.new(-1, 1)],
+    {
+      offsets: [Coords.new(0, 0), Coords.new(0, -1), Coords.new(0, 1), Coords.new(-1, 1)],
+      color: 'cyan'
+    },
     # right S
-    [Coords.new(0, 0), Coords.new(0, -1), Coords.new(1, 0), Coords.new(1, 1)],
+    {
+      offsets: [Coords.new(0, 0), Coords.new(0, -1), Coords.new(1, 0), Coords.new(1, 1)],
+      color: 'blue'
+    },
     # left S
-    [Coords.new(0, 0), Coords.new(0, -1), Coords.new(-1, 0), Coords.new(-1, 1)]
+    {
+      offsets: [Coords.new(0, 0), Coords.new(0, -1), Coords.new(-1, 0), Coords.new(-1, 1)],
+      color: 'brown'
+    }
   ]
 
   attr_accessor :position
   attr_reader :offsets
+  attr_accessor :color
 
-  def initialize(position, offsets: nil)
+  def initialize(position, offsets: nil, color: nil)
     @position = position.dup
 
     if offsets
       @offsets = offsets.map(&:dup)
+      @color = color
     else
-      @offsets = PIECES[rand(PIECES.count)].map(&:dup)
+      piece = PIECES[rand(PIECES.count)].map(&:dup).to_h
+      @offsets = piece[:offsets]
+      @color = piece[:color]
       rand(4).times { rotate }
-      enforce_bounds
     end
+
+    enforce_bounds
   end
 
   def dup
-    self.class.new(@position, offsets: @offsets)
+    self.class.new(@position, offsets: @offsets, color: @color)
   end
 
   def rotate
@@ -44,11 +72,11 @@ class Piece
   end
 
   def enforce_bounds
-    @offsets.each do |offset|
-      @position.row = @position.row + 1 while @position.row + offset.row < 0
-      @position.row = @position.row - 1 while @position.row + offset.row >= Board::ROWS
-      @position.col = @position.col + 1 while @position.col + offset.col < 0
-      @position.col = @position.col - 1 while @position.col + offset.col >= Board::COLS
+    (0...offset_coords.count).each do |index|
+      @position.row = @position.row + 1 while offset_coords[index].row < 0
+      @position.row = @position.row - 1 while offset_coords[index].row >= Board::ROWS
+      @position.col = @position.col + 1 while offset_coords[index].col < 0
+      @position.col = @position.col - 1 while offset_coords[index].col >= Board::COLS
     end
   end
 

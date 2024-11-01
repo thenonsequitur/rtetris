@@ -17,11 +17,10 @@ class Canvas
   def draw_rectangle(row, col, lines)
     self.class.pad_lines(lines).each_with_index do |rect_line, rect_line_num|
       line_num = row + rect_line_num
-      rect_line = rect_line[0..(COLS - col)]
       break if line_num >= ROWS
 
-      left_slice = @lines[line_num][0...col].to_s
-      right_slice = @lines[line_num][(col + rect_line.length)..].to_s
+      left_slice = @lines[line_num].colorized_chars[0...col].join.to_s
+      right_slice = @lines[line_num].colorized_chars[(col + rect_line.uncolorize.length)..].join.to_s
       @lines[line_num] = left_slice + rect_line + right_slice
     end
   end
@@ -37,9 +36,9 @@ class Canvas
     padded_lines = pad_lines(lines)
 
     boxed_lines = []
-    boxed_lines << '┌' + ('─' * padded_lines.first.length) + '┐'
+    boxed_lines << '┌' + ('─' * padded_lines.first.uncolorize.length) + '┐'
     boxed_lines += padded_lines.map { |line| '│' + line + '│' }
-    boxed_lines << '└' + ('─' * padded_lines.first.length) + '┘'
+    boxed_lines << '└' + ('─' * padded_lines.first.uncolorize.length) + '┘'
 
     boxed_lines
   end
@@ -47,9 +46,9 @@ class Canvas
   private
 
   def self.pad_lines(lines)
-    max_length = lines.map(&:length).max
+    max_length = lines.map { |line| line.uncolorize.length }.max
     lines.map do |line|
-      padding = ' ' * (max_length - line.length)
+      padding = ' ' * (max_length - line.uncolorize.length)
       line + padding
     end
   end

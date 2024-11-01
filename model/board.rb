@@ -20,7 +20,7 @@ class Board
 
   def cement(piece)
     piece.offset_coords.each do |offset|
-      @state[offset.row][offset.col] = true
+      @state[offset.row][offset.col] = piece.color
     end
   end
 
@@ -28,7 +28,7 @@ class Board
     lines = 0
 
     0.upto(ROWS - 1) do |scan_row|
-      if @state[scan_row].all?(true)
+      if @state[scan_row].all?
         scan_row.downto(1) do |collapse_row|
           @state[collapse_row] = @state[collapse_row - 1]
         end

@@ -64,6 +64,8 @@ class Game
       piece_down
     when ' '
       piece_drop
+    when 'd'
+      debugger
     end
     true
   end
@@ -104,7 +106,8 @@ class Game
   end
 
   def piece_drop
-    true while piece_down
+    @piece = ghost_piece
+    piece_down
   end
 
   def ghost_piece
@@ -128,6 +131,7 @@ class Game
 
     @piece = @next_piece
     @next_piece = spawn_piece
+    @piece.enforce_bounds
   end
 
   def increase_speed(num_gradations)
@@ -142,7 +146,7 @@ class Game
 
     canvas = Canvas.new
     canvas.draw_rectangle(0, left, board_rect)
-    canvas.draw_rectangle(0, left + board_rect.last.length + 2, stats_rect)
+    canvas.draw_rectangle(0, left + board_rect.last.uncolorize.length + 2, stats_rect)
     canvas.display
   end
 
@@ -154,15 +158,15 @@ class Game
       rect_row = ''.dup
       0.upto(Board::COLS - 1).each do |col|
         cell = Coords.new(row, col)
-        char = ' '
         if @piece.offset_coords.any? { |offset_coord| offset_coord == cell }
-          char = PIECE_CHAR
+          rect_row += (PIECE_CHAR * 2).send(@piece.color)
         elsif ghost.offset_coords.any? { |offset_coord| offset_coord == cell }
-          char = GHOST_CHAR
-        elsif @board.get(cell)
-          char = BOARD_CHAR
+          rect_row += (GHOST_CHAR * 2).send(@piece.color)
+        elsif color = @board.get(cell)
+          rect_row += (BOARD_CHAR * 2).send(@board.get(cell))
+        else
+          rect_row += '  '
         end
-        rect_row += char * 2
       end
       rect << rect_row
     end
@@ -197,8 +201,11 @@ class Game
     next_piece_grid.each do |row|
       rect_row = ''.dup
       row.each do |cell|
-        char = cell ? PIECE_CHAR : ' '
-        rect_row += char * 2
+        if cell
+          rect_row += (PIECE_CHAR * 2).send(@next_piece.color)
+        else
+          rect_row += '  '
+        end
       end
       rect << rect_row
     end
