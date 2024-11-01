@@ -9,6 +9,7 @@ class Game
 
   BOARD_CHAR = '▒'
   PIECE_CHAR = '▓'
+  GHOST_CHAR = '░'
 
   def initialize
     @lines = 0
@@ -84,13 +85,13 @@ class Game
     @piece = moved_piece unless @board.collide?(moved_piece)
   end
 
-  def piece_down
+  def piece_down(should_complete_lines: true)
     moved_piece = @piece.dup
     moved_piece.position.row += 1
     moved_piece.enforce_bounds
 
     if moved_piece.position.row != @piece.position.row + 1 || @board.collide?(moved_piece)
-      complete_lines
+      complete_lines if should_complete_lines
       false
     else
       @piece = moved_piece
@@ -100,6 +101,14 @@ class Game
 
   def piece_drop
     true while piece_down
+  end
+
+  def ghost_piece
+    real = @piece
+    true while piece_down(should_complete_lines: false)
+    ghost = @piece
+    @piece = real
+    ghost
   end
 
   def complete_lines
@@ -134,6 +143,8 @@ class Game
   end
 
   def board_rect
+    ghost = ghost_piece
+
     rect = []
     0.upto(Board::ROWS - 1).each do |row|
       rect_row = ''.dup
@@ -142,6 +153,8 @@ class Game
         char = ' '
         if @piece.offset_coords.any? { |offset_coord| offset_coord == cell }
           char = PIECE_CHAR
+        elsif ghost.offset_coords.any? { |offset_coord| offset_coord == cell }
+          char = GHOST_CHAR
         elsif @board.get(cell)
           char = BOARD_CHAR
         end
